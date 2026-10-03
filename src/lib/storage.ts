@@ -352,3 +352,46 @@ export const addCashClosing = (data: Omit<CashClosingRecord, 'id' | 'closedAt'>,
     afterData: record,
   });
 };
+
+export const exportFullBackupJSON = () => {
+  if (typeof window === 'undefined') return '';
+  const data = {
+    exportDate: new Date().toISOString(),
+    version: '2.5.0-Compliance',
+    settings: getSettings(),
+    receipts: getReceipts(),
+    statements: getStatements(),
+    auditLogs: getAuditLogs(),
+    inspections: getInspectionChecklist(),
+    complaints: getComplaints(),
+    cashClosings: getCashClosings(),
+  };
+  return JSON.stringify(data, null, 2);
+};
+
+export const restoreFullBackupJSON = (jsonStr: string): boolean => {
+  if (typeof window === 'undefined') return false;
+  try {
+    const data = JSON.parse(jsonStr);
+    if (data.settings) localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(data.settings));
+    if (data.receipts) localStorage.setItem(STORAGE_KEYS.RECEIPTS, JSON.stringify(data.receipts));
+    if (data.statements) localStorage.setItem(STORAGE_KEYS.STATEMENTS, JSON.stringify(data.statements));
+    if (data.auditLogs) localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(data.auditLogs));
+    if (data.inspections) localStorage.setItem(STORAGE_KEYS.INSPECTIONS, JSON.stringify(data.inspections));
+    if (data.complaints) localStorage.setItem(STORAGE_KEYS.COMPLAINTS, JSON.stringify(data.complaints));
+    if (data.cashClosings) localStorage.setItem(STORAGE_KEYS.CASH_CLOSINGS, JSON.stringify(data.cashClosings));
+    
+    addAuditLog({
+      userId: 'user_active',
+      userName: 'সিস্টেম অ্যাডমিন',
+      userRole: 'owner',
+      action: 'UPDATE_SETTINGS',
+      details: 'অফলাইন JSON ব্যাকআপ হতে সম্পূর্ণ সিস্টেম ডাটা সফলভাবে রিস্টোর করা হয়েছে।',
+      ipAddress: '103.145.118.24',
+      device: 'Desktop Chrome / Windows 11',
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
