@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'SolaimanLipi', 'Kalpurush', 'Noto Sans Bengali', sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+}
+
+/* Custom print media rules */
+@media print {
+  body {
+    background: transparent !important;
+    color: #000 !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+
+  /* Specific checkbook receipt print style */
+  @page receipt-page {
+    size: 8.27in 3.89in;
+    margin: 0;
+  }
+
+  .receipt-print-container {
+    page: receipt-page;
+    width: 8.27in !important;
+    height: 3.89in !important;
+    margin: 0 !important;
+    padding: 0.15in !important;
+    box-sizing: border-box !important;
+    page-break-after: always;
+    overflow: hidden;
+  }
+
+  /* A4 Landscape for Government Statement */
+  @page statement-landscape {
+    size: 297mm 210mm landscape;
+    margin: 12mm 15mm;
+  }
+
+  .statement-print-container {
+    page: statement-landscape;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    background: white !important;
+  }
+}
