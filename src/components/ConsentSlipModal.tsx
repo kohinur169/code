@@ -6,7 +6,7 @@ import { toBanglaDigits } from '@/lib/banglaConverter';
 import { Printer, X, Shield, FileCheck2 } from 'lucide-react';
 
 interface ConsentSlipModalProps {
-  receipt: ReceiptItem;
+  receipt?: ReceiptItem;
   settings: BusinessSettings;
   onClose: () => void;
 }
@@ -16,6 +16,20 @@ export const ConsentSlipModal: React.FC<ConsentSlipModalProps> = ({
   settings,
   onClose,
 }) => {
+  const activeReceipt: Partial<ReceiptItem> & { receiptNo: string; customerName: string; customerMobile: string; serviceName: string; totalAmount: number; createdAt: string } = receipt || {
+    id: 'blank',
+    receiptNo: 'LSFC-BLANK-XXXXXX',
+    customerName: 'নাগরিকের নাম (খসড়া)',
+    customerMobile: '০১XXXXXXXXX',
+    serviceName: 'ই-নামজারি ও রেকর্ড সংশোধন আবেদন',
+    totalAmount: 250,
+    applicationTrackingNo: 'প্রক্রিয়াধীন',
+    paymentMethod: 'cash',
+    status: 'valid',
+    createdAt: new Date().toISOString(),
+    verificationToken: 'sample-token',
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -74,7 +88,7 @@ export const ConsentSlipModal: React.FC<ConsentSlipModalProps> = ({
 
           <div className="space-y-2 text-justify">
             <p>
-              আমি নিম্নস্বাক্ষরকারী সেবা গ্রহীতা <strong>{receipt.customerName}</strong>, মোবাইল নং: <strong className="font-mono">{toBanglaDigits(receipt.customerMobile)}</strong>, এতদ্বারা সচেতনভাবে সম্মতি জ্ঞাপন করছি যে, আমার পক্ষে গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের নির্ধারিত ভূমিসেবা <strong>&quot;{receipt.serviceName}&quot;</strong> সংক্রান্ত আবেদনপত্র অনলাইনে দাখিল ও নিষ্পত্তিতে সহায়তার জন্য অত্র অনুমোদিত <strong>&quot;{settings.businessName}&quot;</strong> ভূমিসেবা সহায়তা কেন্দ্রকে আমার প্রতিনিধি হিসেবে দায়িত্ব প্রদান করলাম।
+              আমি নিম্নস্বাক্ষরকারী সেবা গ্রহীতা <strong>{activeReceipt.customerName}</strong>, মোবাইল নং: <strong className="font-mono">{toBanglaDigits(activeReceipt.customerMobile)}</strong>, এতদ্বারা সচেতনভাবে সম্মতি জ্ঞাপন করছি যে, আমার পক্ষে গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের নির্ধারিত ভূমিসেবা <strong>&quot;{activeReceipt.serviceName}&quot;</strong> সংক্রান্ত আবেদনপত্র অনলাইনে দাখিল ও নিষ্পত্তিতে সহায়তার জন্য অত্র অনুমোদিত <strong>&quot;{settings.businessName}&quot;</strong> ভূমিসেবা সহায়তা কেন্দ্রকে আমার প্রতিনিধি হিসেবে দায়িত্ব প্রদান করলাম।
             </p>
             
             <p>
@@ -85,20 +99,27 @@ export const ConsentSlipModal: React.FC<ConsentSlipModalProps> = ({
           <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 grid grid-cols-2 gap-2 text-[11px]">
             <div>
               <span className="text-slate-500">রিসিট নম্বর: </span>
-              <strong className="font-mono text-slate-900">{receipt.receiptNo}</strong>
+              <strong className="font-mono text-slate-900">{activeReceipt.receiptNo}</strong>
             </div>
             <div>
               <span className="text-slate-500">তারিখ: </span>
-              <span className="text-slate-800">{toBanglaDigits(receipt.createdAt)}</span>
+              <span className="text-slate-800">{toBanglaDigits(activeReceipt.createdAt)}</span>
             </div>
             <div>
               <span className="text-slate-500">আবেদন ট্র্যাকিং নং: </span>
-              <span className="font-mono font-bold text-slate-900">{receipt.applicationTrackingNo || 'প্রক্রিয়াধীন'}</span>
+              <span className="font-mono font-bold text-slate-900">{activeReceipt.applicationTrackingNo || 'প্রক্রিয়াধীন'}</span>
             </div>
             <div>
               <span className="text-slate-500">পরিশোধিত সহায়তা ফি: </span>
-              <strong className="text-emerald-800">৳{toBanglaDigits(receipt.totalAmount)}/-</strong>
+              <strong className="text-emerald-800">৳{toBanglaDigits(activeReceipt.totalAmount)}/-</strong>
             </div>
+          </div>
+
+          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-950 flex items-start gap-2">
+            <Shield className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+            <p className="text-[10px] leading-tight">
+              <strong>গোপনীয়তা ও ডাটা নিরাপত্তা অঙ্গীকার:</strong> কেন্দ্র কর্তৃপক্ষ গ্রাহকের ব্যক্তিগত পরিচয়পত্র ও জমির দলিল শুধুমাত্র উক্ত সরকারি আবেদন প্রক্রিয়াকরণে ব্যবহার করবে এবং কোনো অবস্থাতেই তৃতীয় পক্ষের নিকট হস্তান্তর করবে না।
+            </p>
           </div>
 
           <div className="pt-12 grid grid-cols-2 gap-8 text-center text-xs">
@@ -106,7 +127,7 @@ export const ConsentSlipModal: React.FC<ConsentSlipModalProps> = ({
               <div className="border-t border-slate-400 pt-1 font-bold text-slate-900">
                 সেবা গ্রহীতার স্বাক্ষর
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">{receipt.customerName}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{activeReceipt.customerName}</p>
             </div>
 
             <div>

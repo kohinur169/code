@@ -101,7 +101,7 @@ export interface AuditLog {
   userId: string;
   userName: string;
   userRole: 'owner' | 'manager' | 'operator';
-  action: 'LOGIN' | 'CREATE_RECEIPT' | 'VOID_RECEIPT' | 'REPRINT_RECEIPT' | 'GENERATE_STATEMENT' | 'UPDATE_SETTINGS' | 'CASH_CLOSING' | 'VIEW_SENSITIVE_DATA' | 'BACKUP_DRIVE';
+  action: 'LOGIN' | 'CREATE_RECEIPT' | 'VOID_RECEIPT' | 'REPRINT_RECEIPT' | 'GENERATE_STATEMENT' | 'UPDATE_SETTINGS' | 'CASH_CLOSING' | 'VIEW_SENSITIVE_DATA' | 'BACKUP_DRIVE' | 'MAKER_CHECKER_APPROVAL' | 'MAKER_CHECKER_REJECT';
   details: string;
   ipAddress: string;
   device: string;
