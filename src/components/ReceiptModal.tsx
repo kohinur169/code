@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { ReceiptItem, BusinessSettings } from '@/types';
-import { toBanglaDigits, numberToBanglaWords, formatBanglaDate } from '@/lib/banglaConverter';
+import { toBanglaDigits, numberToBanglaWords } from '@/lib/banglaConverter';
 import { QRCodeSVG } from 'qrcode.react';
-import { Printer, X, ShieldAlert, CheckCircle2, Download, AlertTriangle, CloudCheck, Eye } from 'lucide-react';
+import { Printer, X, AlertTriangle, CloudCheck, Eye } from 'lucide-react';
 import { voidReceipt, incrementReceiptPrintCount } from '@/lib/storage';
 
 interface ReceiptModalProps {
@@ -24,7 +24,6 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   const [showVoidModal, setShowVoidModal] = useState(false);
   const [voidReason, setVoidReason] = useState('');
   const [showCounterfoil, setShowCounterfoil] = useState(false);
-  const printRef = useRef<HTMLDivElement>(null);
 
   if (!receipt) return null;
 
@@ -60,7 +59,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-base">
-                রিসিট বিস্তারিত ও প্রিন্ট প্রিভিউ
+                রিসিট বিস্তারিত ও ৮.২৭" × ৩.৮৯" প্রিন্ট ইঞ্জিন
               </h3>
               <p className="text-xs text-slate-300">
                 রিসিট নং: {receipt.receiptNo} | তারিখ: {receipt.createdAt}
@@ -149,7 +148,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold flex items-center gap-1.5 shadow-sm transition-all"
             >
               <Printer className="w-4 h-4" />
-              প্রিন্ট করুন (শুধু গ্রাহক কপি)
+              প্রিন্ট করুন (শুধুমাত্র ১টি গ্রাহক কপি)
             </button>
           </div>
         </div>
@@ -160,31 +159,31 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           {/* CHECKBOOK STYLE CONTAINER (8.27in x 3.89in) */}
           {printMode === 'checkbook' && (
             <div
-              ref={printRef}
               className={`receipt-print-container bg-white shadow-lg border border-slate-300 relative text-slate-800 transition-all ${
-                receipt.status === 'voided' ? 'opacity-85' : ''
+                receipt.status === 'voided' ? 'opacity-90' : ''
               }`}
               style={{
                 width: '8.27in',
+                height: '3.89in',
                 minHeight: '3.89in',
                 maxHeight: '3.89in',
                 boxSizing: 'border-box',
-                padding: '0.18in 0.25in',
+                padding: '0.16in 0.22in',
                 fontFamily: `'SolaimanLipi', 'Kalpurush', sans-serif`,
               }}
             >
               {/* Void Watermark if voided */}
               {receipt.status === 'voided' && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                  <span className="text-7xl font-extrabold text-red-500/20 rotate-[-20deg] border-4 border-dashed border-red-500/30 px-10 py-2 rounded-xl">
+                  <span className="text-6xl font-black text-red-600/25 rotate-[-20deg] border-4 border-dashed border-red-600/35 px-8 py-2 rounded-xl">
                     বাতিল / VOID
                   </span>
                 </div>
               )}
 
-              {/* Digital Counterfoil Overlay View (when toggled) */}
+              {/* On-Screen Counterfoil View (Only visible on screen when toggled, never prints) */}
               {showCounterfoil ? (
-                <div className="h-full flex flex-col justify-between border-2 border-indigo-200 bg-indigo-50/40 p-4 rounded-xl">
+                <div className="no-print h-full flex flex-col justify-between border-2 border-indigo-200 bg-indigo-50/40 p-4 rounded-xl">
                   <div className="flex items-center justify-between border-b border-indigo-200 pb-2">
                     <div>
                       <span className="px-2 py-0.5 bg-indigo-600 text-white text-[11px] font-bold rounded">
@@ -222,140 +221,144 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                     <span>গুগল ড্রাইভ আইডি: {receipt.drivePdfId}</span>
                   </div>
                 </div>
-              ) : (
-                /* ACTUAL CLIENT COPY (ONLY 1 COPY PRINTS AS REQUESTED) */
-                <div className="h-full flex flex-col justify-between">
-                  {/* Top Header */}
-                  <div>
-                    <div className="flex items-start justify-between border-b border-slate-300 pb-1.5">
-                      <div className="flex items-center gap-2">
-                        {/* Official Icon */}
-                        <div className="w-8 h-8 rounded-md bg-emerald-700 flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                          ভূমিসেবা
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-semibold text-emerald-800 tracking-tight leading-tight">
-                            গণপ্রজাতন্ত্রী বাংলাদেশ সরকার অনুমোদিত
-                          </p>
-                          <h2 className="text-sm font-extrabold text-slate-900 leading-tight">
-                            {settings.businessName} • {settings.lsfcName} ভূমিসেবা সহায়তা কেন্দ্র
-                          </h2>
-                          <p className="text-[10px] text-slate-600 leading-tight">
-                            {settings.addressDetails} | অনুমোদন নং: {toBanglaDigits(settings.licenseNo)} | মোবাইল: {toBanglaDigits(settings.mobile)}
-                          </p>
-                        </div>
-                      </div>
+              ) : null}
 
-                      <div className="text-right">
-                        <span className="inline-block px-2 py-0.5 bg-slate-900 text-white text-[10px] font-bold rounded">
-                          নাগরিক সেবা রিসিট (গ্রাহক কপি)
-                        </span>
-                        <p className="text-[11px] font-mono font-bold text-slate-900 mt-0.5">
-                          {receipt.receiptNo}
-                        </p>
-                        <p className="text-[10px] text-slate-500">
-                          তারিখ: {toBanglaDigits(receipt.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Customer & Service Info Bar */}
-                    <div className="grid grid-cols-12 gap-2 mt-1.5 text-[11px] bg-slate-50 p-1.5 rounded border border-slate-200">
-                      <div className="col-span-4">
-                        <span className="text-slate-500">সেবা গ্রহীতা: </span>
-                        <strong className="text-slate-900">{receipt.customerName}</strong>
-                      </div>
-                      <div className="col-span-4">
-                        <span className="text-slate-500">মোবাইল: </span>
-                        <strong className="text-slate-900 font-mono">{toBanglaDigits(receipt.customerMobile)}</strong>
-                      </div>
-                      <div className="col-span-4 text-right">
-                        <span className="text-slate-500">ট্র্যাকিং নং: </span>
-                        <strong className="text-slate-800 font-mono">{receipt.applicationTrackingNo || 'N/A'}</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Service Table - Aligned with Appendix 8 */}
-                  <div className="my-1">
-                    <table className="w-full text-[11px] border-collapse border border-slate-300">
-                      <thead>
-                        <tr className="bg-slate-100 text-slate-700">
-                          <th className="border border-slate-300 px-2 py-0.5 text-left font-bold">সেবার নাম</th>
-                          <th className="border border-slate-300 px-2 py-0.5 text-center font-bold">স্ক্যান পৃষ্ঠা</th>
-                          <th className="border border-slate-300 px-2 py-0.5 text-right font-bold">সরকারি ফি</th>
-                          <th className="border border-slate-300 px-2 py-0.5 text-right font-bold">সহায়তা ফি</th>
-                          <th className="border border-slate-300 px-2 py-0.5 text-right font-bold">মোট ফি</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="border border-slate-300 px-2 py-1 font-semibold text-slate-800">
-                            {receipt.serviceName}
-                          </td>
-                          <td className="border border-slate-300 px-2 py-1 text-center text-slate-600">
-                            {toBanglaDigits(receipt.scannedPages)} টি {receipt.extraScanFee > 0 && `(+৳${toBanglaDigits(receipt.extraScanFee)})`}
-                          </td>
-                          <td className="border border-slate-300 px-2 py-1 text-right text-slate-600">
-                            ৳{toBanglaDigits(receipt.govtFee)}/-
-                          </td>
-                          <td className="border border-slate-300 px-2 py-1 text-right text-slate-600">
-                            ৳{toBanglaDigits(receipt.serviceFee)}/-
-                          </td>
-                          <td className="border border-slate-300 px-2 py-1 text-right font-bold text-slate-900">
-                            ৳{toBanglaDigits(receipt.totalAmount)}/-
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    {/* In Words Row */}
-                    <div className="flex items-center justify-between mt-1 text-[10px] text-slate-700">
-                      <div>
-                        <span className="font-bold">কথায়: </span>
-                        <span className="italic">{numberToBanglaWords(receipt.totalAmount)}</span>
-                      </div>
-                      <div className="font-semibold text-slate-600">
-                        পরিশোধের মাধ্যম: <span className="uppercase text-slate-900">{receipt.paymentMethod}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom Footer with Signature & QR Code */}
-                  <div className="border-t border-slate-300 pt-1 flex items-end justify-between">
-                    {/* QR Code and verification info */}
+              {/* ACTUAL CLIENT COPY (ONLY 1 COPY PRINTS AS REQUESTED) */}
+              <div className={`h-full flex flex-col justify-between ${showCounterfoil ? 'hidden' : 'flex'}`}>
+                {/* Top Header */}
+                <div>
+                  <div className="flex items-start justify-between border-b border-slate-300 pb-1">
                     <div className="flex items-center gap-2">
-                      <div className="p-0.5 bg-white border border-slate-300 rounded shadow-xs">
-                        <QRCodeSVG
-                          value={verifyUrl}
-                          size={46}
-                          level="M"
-                        />
+                      {/* Official LSFC Icon */}
+                      <div className="w-8 h-8 rounded-md bg-emerald-700 flex flex-col items-center justify-center text-white text-[8px] font-extrabold shadow-sm shrink-0">
+                        <span>ভূমি</span>
+                        <span>সেবা</span>
                       </div>
-                      <div className="text-[9px] text-slate-500 leading-tight max-w-[2.6in]">
-                        <p className="font-bold text-slate-700">অনলাইন যাচাইযোগ্য রিসিট</p>
-                        <p>কিউআর কোড স্ক্যান করে সরকারি বৈধতা যাচাই করুন। অতিরিক্ত অর্থ দাবি করলে ১৬১২২ নম্বরে কল করুন।</p>
+                      <div>
+                        <p className="text-[10px] font-semibold text-emerald-800 tracking-tight leading-tight">
+                          গণপ্রজাতন্ত্রী বাংলাদেশ সরকার অনুমোদিত
+                        </p>
+                        <h2 className="text-sm font-black text-slate-900 leading-tight">
+                          {settings.businessName} • {settings.lsfcName} ভূমিসেবা সহায়তা কেন্দ্র
+                        </h2>
+                        <p className="text-[9px] text-slate-600 leading-tight">
+                          {settings.addressDetails} | অনুমোদন নং: {toBanglaDigits(settings.licenseNo)} | মোবাইল: {toBanglaDigits(settings.mobile)}
+                        </p>
                       </div>
                     </div>
 
-                    {/* Authorized Signature Block */}
-                    <div className="text-center pr-2">
-                      <div className="h-8 flex items-center justify-center">
-                        {/* Signature Representation */}
-                        <div className="font-serif italic text-blue-900 font-extrabold text-sm border-b border-slate-400 px-4">
-                          {settings.inchargeName}
-                        </div>
-                      </div>
-                      <p className="text-[9px] font-bold text-slate-800 leading-tight">
-                        {settings.inchargeName}
+                    <div className="text-right">
+                      <span className="inline-block px-2 py-0.5 bg-slate-900 text-white text-[9px] font-bold rounded">
+                        নাগরিক সেবা রিসিট (গ্রাহক কপি)
+                      </span>
+                      <p className="text-[11px] font-mono font-bold text-slate-900 mt-0.5">
+                        {receipt.receiptNo}
                       </p>
-                      <p className="text-[8px] text-slate-500 leading-tight">
-                        {settings.inchargeDesignation}, {settings.businessName}
+                      <p className="text-[9px] text-slate-500">
+                        তারিখ: {toBanglaDigits(receipt.createdAt)}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Customer & Service Info Bar */}
+                  <div className="grid grid-cols-12 gap-2 mt-1 text-[10px] bg-slate-50 p-1 rounded border border-slate-200">
+                    <div className="col-span-4">
+                      <span className="text-slate-500">সেবা গ্রহীতা: </span>
+                      <strong className="text-slate-900">{receipt.customerName}</strong>
+                    </div>
+                    <div className="col-span-4">
+                      <span className="text-slate-500">মোবাইল: </span>
+                      <strong className="text-slate-900 font-mono">{toBanglaDigits(receipt.customerMobile)}</strong>
+                    </div>
+                    <div className="col-span-4 text-right">
+                      <span className="text-slate-500">ট্র্যাকিং নং: </span>
+                      <strong className="text-slate-800 font-mono">{receipt.applicationTrackingNo || 'N/A'}</strong>
                     </div>
                   </div>
                 </div>
-              )}
+
+                {/* Service Table - Aligned with Appendix 8 */}
+                <div className="my-0.5">
+                  <table className="w-full text-[10px] border-collapse border border-slate-300">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-700">
+                        <th className="border border-slate-300 px-2 py-0.5 text-left font-bold">সেবার নাম</th>
+                        <th className="border border-slate-300 px-2 py-0.5 text-center font-bold">স্ক্যান পৃষ্ঠা</th>
+                        <th className="border border-slate-300 px-2 py-0.5 text-right font-bold">সরকারি ফি</th>
+                        <th className="border border-slate-300 px-2 py-0.5 text-right font-bold">সহায়তা ফি</th>
+                        <th className="border border-slate-300 px-2 py-0.5 text-right font-bold">মোট ফি</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-slate-300 px-2 py-0.5 font-semibold text-slate-800">
+                          {receipt.serviceName}
+                        </td>
+                        <td className="border border-slate-300 px-2 py-0.5 text-center text-slate-600">
+                          {toBanglaDigits(receipt.scannedPages)} টি {receipt.extraScanFee > 0 && `(+৳${toBanglaDigits(receipt.extraScanFee)})`}
+                        </td>
+                        <td className="border border-slate-300 px-2 py-0.5 text-right text-slate-600">
+                          ৳{toBanglaDigits(receipt.govtFee)}/-
+                        </td>
+                        <td className="border border-slate-300 px-2 py-0.5 text-right text-slate-600">
+                          ৳{toBanglaDigits(receipt.serviceFee)}/-
+                        </td>
+                        <td className="border border-slate-300 px-2 py-0.5 text-right font-bold text-slate-900">
+                          ৳{toBanglaDigits(receipt.totalAmount)}/-
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* In Words Row */}
+                  <div className="flex items-center justify-between mt-0.5 text-[9px] text-slate-700">
+                    <div>
+                      <span className="font-bold">কথায়: </span>
+                      <span className="italic">{numberToBanglaWords(receipt.totalAmount)}</span>
+                    </div>
+                    <div className="font-semibold text-slate-600">
+                      পরিশোধের মাধ্যম: <span className="uppercase text-slate-900 font-bold">{receipt.paymentMethod}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Footer with Signature & QR Code */}
+                <div className="border-t border-slate-300 pt-0.5 flex items-end justify-between">
+                  {/* QR Code and verification info */}
+                  <div className="flex items-center gap-2">
+                    <div className="p-0.5 bg-white border border-slate-300 rounded shadow-xs shrink-0">
+                      <QRCodeSVG
+                        value={verifyUrl}
+                        size={42}
+                        level="M"
+                      />
+                    </div>
+                    <div className="text-[8px] text-slate-500 leading-tight max-w-[2.7in]">
+                      <p className="font-bold text-slate-700">অনলাইন যাচাইযোগ্য রিসিট</p>
+                      <p>কিউআর কোড স্ক্যান করে সরকারি বৈধতা যাচাই করুন। অতিরিক্ত অর্থ দাবি করলে ১৬১২২ নম্বরে কল করুন।</p>
+                    </div>
+                  </div>
+
+                  {/* Authorized Signature Block */}
+                  <div className="text-center pr-2">
+                    <div className="h-7 flex items-center justify-center">
+                      {settings.signatureUrl && settings.signatureUrl.startsWith('data:image') ? (
+                        <img src={settings.signatureUrl} alt="Sign" className="h-6 object-contain" />
+                      ) : (
+                        <div className="font-serif italic text-blue-900 font-extrabold text-xs border-b border-slate-400 px-4">
+                          {settings.inchargeName}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[8.5px] font-bold text-slate-800 leading-tight">
+                      {settings.inchargeName}
+                    </p>
+                    <p className="text-[7.5px] text-slate-500 leading-tight">
+                      {settings.inchargeDesignation}, {settings.businessName}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
