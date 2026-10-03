@@ -153,6 +153,29 @@ function VerifyContent() {
                 </div>
               </div>
 
+              {/* Citizen 5-Star Rating & Feedback (Clause 11.3.7) */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-center text-xs">
+                <p className="font-bold text-slate-800">
+                  সেবা গ্রহণ পরবর্তী নাগরিক মূল্যায়ন (Citizen Rating):
+                </p>
+                <div className="flex justify-center gap-2 py-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => alert(`ধন্যবাদ! আপনি ${toBanglaDigits(star)} তারকা রেটিং প্রদান করেছেন।`)}
+                      className="text-amber-400 hover:scale-125 transition-transform text-lg"
+                      title={`${toBanglaDigits(star)} তারকা`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  আপনার মূল্যবান মতামত কেন্দ্রের সেবার মান বৃদ্ধি এবং নিয়মিত পরিদর্শনে মূল্যায়িত হয়।
+                </p>
+              </div>
+
               {/* Security notice */}
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
                 <HelpCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
