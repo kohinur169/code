@@ -13,12 +13,13 @@ export interface DriveConfig {
 export interface DriveFileRecord {
   id: string;
   fileName: string;
-  fileType: 'receipt_pdf' | 'statement_pdf' | 'signature_png' | 'logo_png' | 'staff_nid';
+  fileType: 'receipt_pdf' | 'statement_pdf' | 'signature_png' | 'logo_png' | 'staff_nid' | 'monogram_img';
   driveFolder: string;
   driveWebUrl: string;
   driveDownloadUrl: string;
   sizeBytes: number;
   uploadedAt: string;
+  base64Thumbnail?: string;
 }
 
 // In-memory / persistent simulated Google Drive Storage
