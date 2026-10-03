@@ -4,7 +4,21 @@ import React, { useState } from 'react';
 import { ReceiptItem, BusinessSettings } from '@/types';
 import { toBanglaDigits } from '@/lib/banglaConverter';
 import { exportToCSV } from '@/lib/exportUtils';
-import { Printer, Download, Search, Filter, ShieldCheck, DollarSign, Wallet } from 'lucide-react';
+import { ConsentSlipModal } from './ConsentSlipModal';
+import {
+  Printer,
+  Download,
+  Search,
+  Filter,
+  ShieldCheck,
+  DollarSign,
+  Wallet,
+  FileCheck2,
+  MessageSquare,
+  Copy,
+  Check,
+  X,
+} from 'lucide-react';
 
 interface ServiceRegisterViewProps {
   receipts: ReceiptItem[];
@@ -17,6 +31,9 @@ export const ServiceRegisterView: React.FC<ServiceRegisterViewProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [serviceFilter, setServiceFilter] = useState('ALL');
+  const [selectedConsentReceipt, setSelectedConsentReceipt] = useState<ReceiptItem | null>(null);
+  const [smsReceipt, setSmsReceipt] = useState<ReceiptItem | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const filtered = receipts.filter((r) => {
     const matchesSearch =
@@ -57,8 +74,18 @@ export const ServiceRegisterView: React.FC<ServiceRegisterViewProps> = ({
     window.print();
   };
 
+  const getSmsText = (r: ReceiptItem) => {
+    return `প্রিয় ${r.customerName}, ${settings.lsfcName} ভূমিসেবা কেন্দ্র হতে আপনার "${r.serviceName}" আবেদন সফলভাবে দাখিল হয়েছে। ট্র্যাকিং নং: ${r.applicationTrackingNo || 'প্রক্রিয়াধীন'}, রিসিট: ${r.receiptNo}, পরিশোধ: ৳${r.totalAmount}। ভূমিসেবা হটলাইন: ১৬১২২।`;
+  };
+
+  const handleCopySMS = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-sans">
       
       {/* Financial Health & Fee Split Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -178,6 +205,7 @@ export const ServiceRegisterView: React.FC<ServiceRegisterViewProps> = ({
                 <th className="py-2.5 px-3 font-bold text-right">মোট ফি</th>
                 <th className="py-2.5 px-3 font-bold text-center">পরিশোধ</th>
                 <th className="py-2.5 px-3 font-bold">সেবাদানকারী</th>
+                <th className="no-print py-2.5 px-3 font-bold text-center">অ্যাকশন</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -215,12 +243,81 @@ export const ServiceRegisterView: React.FC<ServiceRegisterViewProps> = ({
                   <td className="py-2 px-3 text-slate-600 text-[11px]">
                     {r.createdBy}
                   </td>
+                  <td className="no-print py-2 px-3 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedConsentReceipt(r)}
+                        className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded font-bold text-[10px] border border-emerald-200"
+                        title="নাগরিক সম্মতিপত্র ফরম তৈরি ও প্রিন্ট"
+                      >
+                        সম্মতিপত্র
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSmsReceipt(r)}
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                        title="নাগরিককে এসএমএস পাঠানো"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Citizen Consent Slip Modal */}
+      {selectedConsentReceipt && (
+        <ConsentSlipModal
+          receipt={selectedConsentReceipt}
+          settings={settings}
+          onClose={() => setSelectedConsentReceipt(null)}
+        />
+      )}
+
+      {/* SMS Helper Modal */}
+      {smsReceipt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <MessageSquare className="w-4 h-4 text-blue-600" />
+                <h4 className="font-bold text-slate-900 text-sm">নাগরিক এসএমএস নোটিফিকেশন</h4>
+              </div>
+              <button
+                onClick={() => setSmsReceipt(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <p className="text-slate-500">
+                প্রাপক: <strong>{smsReceipt.customerName}</strong> ({smsReceipt.customerMobile})
+              </p>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-[11px] leading-relaxed">
+                {getSmsText(smsReceipt)}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => handleCopySMS(getSmsText(smsReceipt))}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-sm"
+              >
+                {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'কপি হয়েছে ✓' : 'এসএমএস টেক্সট কপি করুন'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -30,6 +30,7 @@ import { ConsentSlipModal } from '@/components/ConsentSlipModal';
 import { OfficialFeeChartModal } from '@/components/OfficialFeeChartModal';
 import { OfficialLicenseModal } from '@/components/OfficialLicenseModal';
 import { BatchReceiptPrintModal } from '@/components/BatchReceiptPrintModal';
+import { ServiceRegisterView } from '@/components/ServiceRegisterView';
 import {
   FileText,
   Printer,
@@ -61,7 +62,7 @@ export default function DashboardPage() {
   const [driveConfig, setDriveConfig] = useState(getDriveConfig());
 
   // Active view tab
-  const [activeTab, setActiveTab] = useState<'receipts' | 'statements' | 'compliance' | 'audit'>('receipts');
+  const [activeTab, setActiveTab] = useState<'receipts' | 'statements' | 'register' | 'compliance' | 'audit'>('receipts');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modals state
@@ -375,6 +376,19 @@ export default function DashboardPage() {
 
           <button
             type="button"
+            onClick={() => setActiveTab('register')}
+            className={`pb-3 border-b-2 flex items-center gap-2 transition-all ${
+              activeTab === 'register'
+                ? 'border-emerald-600 text-emerald-800'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            সার্ভিস ও ফি লেজার (ট্রেজারি বিভাজন)
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab('compliance')}
             className={`pb-3 border-b-2 flex items-center gap-2 transition-all ${
               activeTab === 'compliance'
@@ -586,6 +600,11 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* TAB: SERVICE & FEE REGISTER */}
+        {activeTab === 'register' && (
+          <ServiceRegisterView receipts={receipts} settings={settings} />
         )}
 
         {/* TAB 3: COMPLIANCE & INSPECTION */}
